@@ -13,13 +13,14 @@ data class Station(
     val overflow: Boolean,
     val totalStands: TotalStands,
     val mainStands: MainStands
-
 )
 
 data class Position(val latitude: Double, val longitude: Double)
 
 data class TotalStands(val availabilities: Availabilities, var capacity: Int)
+
 data class MainStands(val availabilities: Availabilities, var capacity: Int)
+
 data class Availabilities(
     val bikes: Int,
     var stands: Int,

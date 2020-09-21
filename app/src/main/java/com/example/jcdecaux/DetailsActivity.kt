@@ -1,11 +1,11 @@
 package com.example.jcdecaux
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 
 class DetailsActivity : AppCompatActivity() {
-    lateinit var markerTitle : TextView
+    lateinit var markerTitle: TextView
     lateinit var statusTextView: TextView
     lateinit var addressTextView: TextView
     lateinit var bikesTextView: TextView
@@ -51,11 +51,14 @@ class DetailsActivity : AppCompatActivity() {
 
         val electricalInternalBatteryBikes = intent.getStringExtra("electricalInternalBatteryBikes")
         electricalInternalBatteryBikesTextView = findViewById(R.id.electricalInternalBatteryBikes)
-        electricalInternalBatteryBikesTextView.text = "electricalInternalBatteryBikes: $electricalInternalBatteryBikes"
+        electricalInternalBatteryBikesTextView.text =
+            "electricalInternalBatteryBikes: $electricalInternalBatteryBikes"
 
-        val electricalRemovableBatteryBikes = intent.getStringExtra("electricalRemovableBatteryBikes")
+        val electricalRemovableBatteryBikes =
+            intent.getStringExtra("electricalRemovableBatteryBikes")
         electricalRemovableBatteryBikesTextView = findViewById(R.id.electricalRemovableBatteryBikes)
-        electricalRemovableBatteryBikesTextView.text = "electricalRemovableBatteryBikes: $electricalRemovableBatteryBikes"
+        electricalRemovableBatteryBikesTextView.text =
+            "electricalRemovableBatteryBikes: $electricalRemovableBatteryBikes"
 
         val capacity = intent.getStringExtra("capacity")
         capacityTextView = findViewById(R.id.capacity)

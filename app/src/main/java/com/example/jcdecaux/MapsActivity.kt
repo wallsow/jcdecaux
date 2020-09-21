@@ -1,15 +1,8 @@
 package com.example.jcdecaux
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.location.Criteria
-import android.location.Location
-import android.location.LocationManager
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import com.example.jcdecaux.controllers.api.StationsService
 import com.example.jcdecaux.models.Station
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -22,7 +15,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -84,7 +76,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickListe
                                 )
                             ).title(station.name)
                         )
-                        mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(station.position.latitude, station.position.longitude)))
+                        mMap.moveCamera(
+                            CameraUpdateFactory.newLatLng(
+                                LatLng(
+                                    station.position.latitude,
+                                    station.position.longitude
+                                )
+                            )
+                        )
 
                     }
                     mMap.setOnMarkerClickListener { onMarkerClick(it) }
@@ -110,12 +109,30 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickListe
             infosIntent.putExtra("title", currentStation!!.name)
             infosIntent.putExtra("status", currentStation.status)
             infosIntent.putExtra("address", currentStation.address)
-            infosIntent.putExtra("bikes", currentStation.totalStands.availabilities.bikes.toString())
-            infosIntent.putExtra("stands", currentStation.totalStands.availabilities.stands.toString())
-            infosIntent.putExtra("mechanicalBikes", currentStation.totalStands.availabilities.mechanicalBikes.toString())
-            infosIntent.putExtra("electricalBikes", currentStation.totalStands.availabilities.electricalBikes.toString())
-            infosIntent.putExtra("electricalInternalBatteryBikes", currentStation.totalStands.availabilities.electricalInternalBatteryBikes.toString())
-            infosIntent.putExtra("electricalRemovableBatteryBikes", currentStation.totalStands.availabilities.electricalRemovableBatteryBikes.toString())
+            infosIntent.putExtra(
+                "bikes",
+                currentStation.totalStands.availabilities.bikes.toString()
+            )
+            infosIntent.putExtra(
+                "stands",
+                currentStation.totalStands.availabilities.stands.toString()
+            )
+            infosIntent.putExtra(
+                "mechanicalBikes",
+                currentStation.totalStands.availabilities.mechanicalBikes.toString()
+            )
+            infosIntent.putExtra(
+                "electricalBikes",
+                currentStation.totalStands.availabilities.electricalBikes.toString()
+            )
+            infosIntent.putExtra(
+                "electricalInternalBatteryBikes",
+                currentStation.totalStands.availabilities.electricalInternalBatteryBikes.toString()
+            )
+            infosIntent.putExtra(
+                "electricalRemovableBatteryBikes",
+                currentStation.totalStands.availabilities.electricalRemovableBatteryBikes.toString()
+            )
             infosIntent.putExtra("capacity", currentStation.totalStands.capacity.toString())
             infosIntent.putExtra("lastUpdate", currentStation.lastUpdate)
             startActivity(infosIntent)
@@ -125,15 +142,4 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickListe
         return false
     }
 
-    fun getStationsList(jsonString: String): List<Station> {
-
-        val listStationsType = object : TypeToken<List<Station>>() {}.type
-
-        val gson = Gson()
-        val listStations = gson.fromJson<List<Station>>(jsonString, listStationsType)
-
-        Log.i("stations", listStations.toString())
-
-        return listStations
-    }
 }
