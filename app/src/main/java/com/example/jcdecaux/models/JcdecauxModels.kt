@@ -1,20 +1,30 @@
 package com.example.jcdecaux.models
 
-import android.content.Context
-import java.io.IOException
-import java.lang.Exception
+data class Station(
+    val number: Int,
+    val name: String,
+    val address: String,
+    val position: Position,
+    val banking: Boolean,
+    val bonus: Boolean,
+    val status: String,
+    val lastUpdate: String,
+    val connected: Boolean,
+    val overflow: Boolean,
+    val totalStands: TotalStands,
+    val mainStands: MainStands
 
-data class  Station(val number: Int, val name: String, val address: String, val latitude: Double, val longitude: Double)
+)
 
-fun getJsonDataFromAsset(context: Context, fileName: String): String? {
-    val jsonString: String?
-    try {
-        jsonString = context.assets.open(fileName).bufferedReader().use {
-            it.readText()
-        }
-    } catch (e: IOException) {
-        e.printStackTrace()
-        return null
-    }
-    return jsonString
-}
+data class Position(val latitude: Double, val longitude: Double)
+
+data class TotalStands(val availabilities: Availabilities, var capacity: Int)
+data class MainStands(val availabilities: Availabilities, var capacity: Int)
+data class Availabilities(
+    val bikes: Int,
+    var stands: Int,
+    var mechanicalBikes: Int,
+    var electricalBikes: Int,
+    var electricalInternalBatteryBikes: Int,
+    var electricalRemovableBatteryBikes: Int
+)

@@ -1,17 +1,25 @@
 package com.example.jcdecaux
 
-import androidx.appcompat.app.AppCompatActivity
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Criteria
+import android.location.Location
+import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.example.jcdecaux.controllers.api.StationsService
 import com.example.jcdecaux.models.Station
-import com.example.jcdecaux.models.getJsonDataFromAsset
-
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.GoogleMap.MAP_TYPE_HYBRID
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -19,48 +27,22 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.converter.gson.GsonConverterFactory
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickListener {
 
     private lateinit var mMap: GoogleMap
-    val url = "https://api.jcdecaux.com/vls/v1/"
+    val url = "https://api.jcdecaux.com/vls/v3/"
     var listCergyStations: List<Station> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
 
-        val retrofit = Retrofit.Builder()
-            .baseUrl(url)
-            .addConverterFactory(MoshiConverterFactory.create())
-            .build()
-
-//        val service = retrofit.create(StationsService::class.java)
-//
-//        val stationsRequest = service.getCergyStations("Velo2","7f81362be6ebc1ff7d7d7b438f87fc8da5b88c04")
-//
-//        stationsRequest.enqueue(object : Callback<List<Station>> {
-//            override fun onResponse(call: Call<List<Station>>, response: Response<List<Station>>) {
-//                if (response.isSuccessful) {
-//                    listCergyStations = response.body()!!
-//                }
-//            }
-//
-//            override fun onFailure(call: Call<List<Station>>, t: Throwable) {
-//                error("error from api")
-//            }
-//        })
-
-//        val callResponse = stationsRequest.execute()
-
-//        if (callResponse.isSuccessful) {
-//            listCergyStations = callResponse.body()!!
-//        }
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
-                .findFragmentById(R.id.map) as SupportMapFragment
+            .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
 
@@ -76,28 +58,74 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+        val retrofit = Retrofit.Builder()
+            .baseUrl(url)
+            .addConverterFactory(GsonConverterFactory.create(Gson()))
+            .build()
 
-        // Add a marker in Sydney and move the camera
-        val cergy = LatLng(49.0333, 2.0667)
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(cergy))
+        val service = retrofit.create(StationsService::class.java)
 
+        val stationsRequest =
+            service.getCergyStations("cergy-pontoise", "7f81362be6ebc1ff7d7d7b438f87fc8da5b88c04")
 
-        listCergyStations = getStationsList()
+        stationsRequest.enqueue(object : Callback<List<Station>> {
+            override fun onResponse(call: Call<List<Station>>, response: Response<List<Station>>) {
+                if (response.isSuccessful) {
+                    listCergyStations = response.body()!!
 
-        //add Stations markers
-        for (station in listCergyStations) {
-            mMap.addMarker(MarkerOptions().position(LatLng(station.latitude, station.longitude)).title("${station.name} - ${station.address} "))
+                    //add Stations markers
+                    for (station in listCergyStations) {
 
-        }
+                        mMap.addMarker(
+                            MarkerOptions().position(
+                                LatLng(
+                                    station.position.latitude,
+                                    station.position.longitude
+                                )
+                            ).title(station.name)
+                        )
+                        mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(station.position.latitude, station.position.longitude)))
 
-//        mMap.setOnMarkerClickListener { GoogleMap.OnMarkerClickListener() }
+                    }
+                    mMap.setOnMarkerClickListener { onMarkerClick(it) }
+                }
+            }
+
+            override fun onFailure(call: Call<List<Station>>, t: Throwable) {
+                error("error from api")
+            }
+        })
+
+        mMap.setMapType(MAP_TYPE_HYBRID);
 
     }
 
-    fun getStationsList(): List<Station> {
-        val jsonString = getJsonDataFromAsset(applicationContext, "cergy-pontoise.json")
-        Log.i("data= ", jsonString)
+    override fun onMarkerClick(marker: Marker?): Boolean {
+        val currentStation = listCergyStations.find { it.name == marker!!.title }
+
+        val infosIntent = Intent(this@MapsActivity, DetailsActivity::class.java)
+
+        if (currentStation != null) {
+
+            infosIntent.putExtra("title", currentStation!!.name)
+            infosIntent.putExtra("status", currentStation.status)
+            infosIntent.putExtra("address", currentStation.address)
+            infosIntent.putExtra("bikes", currentStation.totalStands.availabilities.bikes.toString())
+            infosIntent.putExtra("stands", currentStation.totalStands.availabilities.stands.toString())
+            infosIntent.putExtra("mechanicalBikes", currentStation.totalStands.availabilities.mechanicalBikes.toString())
+            infosIntent.putExtra("electricalBikes", currentStation.totalStands.availabilities.electricalBikes.toString())
+            infosIntent.putExtra("electricalInternalBatteryBikes", currentStation.totalStands.availabilities.electricalInternalBatteryBikes.toString())
+            infosIntent.putExtra("electricalRemovableBatteryBikes", currentStation.totalStands.availabilities.electricalRemovableBatteryBikes.toString())
+            infosIntent.putExtra("capacity", currentStation.totalStands.capacity.toString())
+            infosIntent.putExtra("lastUpdate", currentStation.lastUpdate)
+            startActivity(infosIntent)
+        }
+
+
+        return false
+    }
+
+    fun getStationsList(jsonString: String): List<Station> {
 
         val listStationsType = object : TypeToken<List<Station>>() {}.type
 

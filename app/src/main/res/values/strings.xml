@@ -1,4 +1,15 @@
 <resources>
     <string name="app_name">JCDECAUX</string>
     <string name="title_activity_maps">Map</string>
+    <string name="info_title">Info Title</string>
+    <string name="address">address</string>
+    <string name="bike">bike</string>
+    <string name="stands">stands</string>
+    <string name="mechanicalbikes">mechanicalBikes</string>
+    <string name="electricalbikes">electricalBikes</string>
+    <string name="electricalinternalbatterybikes">electricalInternalBatteryBikes</string>
+    <string name="electricalremovablebatterybikes">electricalRemovableBatteryBikes</string>
+    <string name="capacity">capacity</string>
+    <string name="lastupdate">lastUpdate</string>
+    <string name="status">status</string>
 </resources>
